@@ -7,14 +7,8 @@ import axios from "axios";
 const TransactionList = () =>{
     const [dataList, setDataList] = useState([]);
 
-    // const getData = async () => {
-    //     const res = await axios.get(`http://localhost:8080/api/getalltransaction`);;
-    //     setDataList(res.data)
-    // }
-
-    
     useEffect(() => {
-        axios.get(`http://localhost:8080/api/getalltransaction`)
+        axios.get(process.env.REACT_APP_API_URL+"getalltransaction")
         .then(res=>setDataList(res.data))
         .catch(err=>console.log(err))
         

@@ -41,43 +41,33 @@ router.post('/inserttransaction', (req,res) => {
 
     function setvalue(gdata){
         bal = gdata
-        //console.log(bal)
         if(type==="1"){
             // console.log(result);
             newbal=parseFloat(bal)+parseFloat(amnt)
-            console.log(newbal);
     
         }else{
             newbal=parseFloat(bal)-amnt
         }
         insertData(newbal)
-        
-
     }
-
     function insertData(newbalance){
         con.query("insert into transactions(description,amount,type,balance) values (?,?,?,?)",[des,amnt,type,newbalance],  (err, result, fields) => {
             if (err) throw err;
-            let message={status:100,msz:"Save Successfully"}
+            let message={status:"100",msz:"Save Successfully"}
             res.json(message);
         });
     }
-    
     con.query("SELECT balance FROM transactions order by id desc limit 1",  (err, balceresult) => {
         if (err) throw err;
+        if(balceresult.length===0){
+            bal=0;
+        }else{
+            bal=balceresult[0].balance
+        }
         
-        bal=balceresult[0].balance
-        //console.log(bal);
         setvalue(bal)
         
-    });
-
-    
-   
-    
-    
-    
-    
+    });    
 });
 
 router.get('/getalltransaction', (req,res) => {

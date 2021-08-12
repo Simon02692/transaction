@@ -1,5 +1,6 @@
 import React, {useState} from "react";
 import { Link } from "react-router-dom";
+import Alert from 'react-bootstrap/Alert';
 import axios from "axios";
 
 
@@ -7,7 +8,8 @@ import axios from "axios";
 
 
 const AddTransaction = () =>{
-
+    const [isValid, setIsValid] = useState(true);
+    const [isShow, setIsShow] = useState(false);
     const [state, setState]=useState({
         addType:"",
         addDescription:"",
@@ -24,22 +26,32 @@ const AddTransaction = () =>{
         });
     }
     function submitData(){
-        console.log(state.addDescription);
-        console.log(state.addAmount);
-        console.log(state.addType);
+        if(state.addDescription==="" || state.addAmount==="" || state.addType===""){
+            setIsValid(false)
+            setIsShow(true)
+        }else{
+            axios.post(process.env.REACT_APP_API_URL+"inserttransaction",{
+                description:state.addDescription,
+                amount:state.addAmount,
+                type:state.addType
+            })
+            .then(res=>
+                {
+                    if(res.status===200){
+                        setIsValid(true)
+                        setIsShow(true)
+                    }
+                }
+            )
+            .catch(err=>console.log(err))
+            setState({
+                addType:"",
+                addDescription:"",
+                addAmount:"",
+            });
+        }
         
-        axios.post(`http://localhost:8080/api/inserttransaction`,{
-            description:state.addDescription,
-            amount:state.addAmount,
-            type:state.addType
-        })
-        .then(res=>console.log(res))
-        .catch(err=>console.log(err))
-        setState({
-            addType:"",
-            addDescription:"",
-            addAmount:"",
-        });
+        
     }
     
 
@@ -48,6 +60,13 @@ const AddTransaction = () =>{
             <div className="row text-end m-2">
                 <div className="col-md-12 text-end m-2">
                     <Link className="col-md-2 btn btn-primary" to="/">Get All</Link>
+                    
+                </div>
+                <div className="col-md-12 text-start mt-2">
+                {isValid 
+                        ? <Alert variant="success" show={isShow}>Hurray! Transaction Save Successfully.<button className="float-end" onClick={() => setIsShow(false)}>X</button></Alert>
+                        : <Alert variant="danger" show={isShow} >Sorry! Please Try again After Some Time<button className="float-end" onClick={() => setIsShow(false)}>X</button></Alert>
+                    }
                 </div>
             </div>
             
@@ -66,7 +85,11 @@ const AddTransaction = () =>{
                 </div>
                 <div className="form-group">
                     <label htmlFor="amnt">Amount:</label>
-                    <input type="text" name="addAmount" className="form-control"  value={state.addAmount} onChange={handleChange} placeholder="Enter Amount" id="amnt" required/>
+                    <input onKeyPress={(event) => {
+                    if (!/^[0-9]*\.?[0-9]*$/.test(event.key)) {
+                    event.preventDefault();
+                    }
+                    }} type="text" name="addAmount" pattern="[0-9]*" className="form-control"  value={state.addAmount} onChange={handleChange} placeholder="Enter Amount" id="amnt" required/>
                 </div>
                 
                 <button type="submit" className="col-md-2 mt-2 btn btn-primary" onClick={submitData}>Submit</button>
